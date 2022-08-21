@@ -1,4 +1,4 @@
-graderFunction <- function(seasons) {
+graderFunction <- function(seasons, password) {
   suppressPackageStartupMessages(library(tidyverse))
   suppressPackageStartupMessages(library(tidymodels))
   library(odbc)
@@ -9,7 +9,7 @@ graderFunction <- function(seasons) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackerRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
   #
@@ -41,13 +41,14 @@ graderFunction <- function(seasons) {
     left_join(tbl(con, "sw_Farm_BlockT") %>% select(c(BlockID, BlockCode, BlockName)), by ="BlockID") %>%
     left_join(tbl(con, "sw_MaturityT") %>% select(c(MaturityID, MaturityCode)), by = "MaturityID") %>%
     left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)), by = c("GrowerCompanyID" = "CompanyID")) %>%
+    left_join(tbl(con, "ma_ShiftT") %>% select(ShiftID, ShiftCode), by = "ShiftID") %>%
     rename(owner = CompanyName) %>%
     select(c(GraderBatchID,
              GraderBatchNo,
              SeasonID,
              PackDate,
              InputKgs,
-             ShiftID,
+             ShiftCode,
              GraderLineID,
              WasteOtherKgs,
              PresizeInputFlag,
@@ -106,7 +107,7 @@ graderFunction <- function(seasons) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
 
@@ -116,11 +117,13 @@ graderFunction <- function(seasons) {
     left_join(tbl(con, "sw_CompanyT") %>% select(CompanyID, CompanyName),
               by = c("GrowerCompanyID" = "CompanyID")) %>%
     rename(owner = CompanyName) %>%
+    mutate(ShiftCode = "Day") %>%
     select(c(GraderBatchID,
              GraderBatchNo,
              SeasonID,
              PackDate,
              InputKgs,
+             ShiftCode,
              RejectKgs,
              owner,
              FarmCode,
@@ -194,6 +197,7 @@ graderFunction <- function(seasons) {
            BlockCode,
            HarvestDate,
            PackDate,
+           ShiftCode,
            storageDays,
            fieldBinsTipped,
            InputKgs,
@@ -234,6 +238,7 @@ graderFunction <- function(seasons) {
              BlockCode,
              HarvestDate,
              PackDate,
+             ShiftCode,
              storageDays,
              fieldBinsTipped,
              InputKgs,
@@ -249,7 +254,7 @@ graderFunction <- function(seasons) {
 
 #============================================================================================================================
 
-binsHarvested <- function(seasons) {
+binsHarvested <- function(seasons, password) {
   suppressPackageStartupMessages(library(tidyverse))
   suppressPackageStartupMessages(library(tidymodels))
   library(odbc)
@@ -260,7 +265,7 @@ binsHarvested <- function(seasons) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackerRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
 
@@ -333,11 +338,11 @@ binsHarvested <- function(seasons) {
   dbDisconnect(con)
 
   con <- dbConnect(odbc(),
-                   Driver = "ODBC Driver 17 for SQL Server", #"SQLServer", #
+                   Driver = "ODBC Driver 17 for SQL Server",
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
 
