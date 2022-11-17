@@ -8,13 +8,16 @@ Rockit Helper function for bins harvested
 A helper function for Rockit R users  - takes a vector of years as an input, makes a call directly to the ABC SQL database and outputs a table of consignments and related proporties.
 }
 \usage{
-binsHarvested(x)
+binsHarvested(x, password)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{x}{
 a vector of years included in the data (default is all years)
-}
+  }
+\item{password}{
+  a charcater string which is the password to the SQL database
+  }
 }
 \details{
 

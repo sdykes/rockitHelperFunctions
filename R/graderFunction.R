@@ -9,7 +9,7 @@ graderFunction <- function(seasons, password) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackerRepl",
                    UID = "abcadmin",
-                   PWD = password,
+                   PWD = "Trauts2018!",
                    Port = 1433
   )
   #
@@ -72,20 +72,21 @@ graderFunction <- function(seasons, password) {
     summarise(looseKgs = sum(KGWeight, na.rm=T)) %>%
     collect()
 
-  looseFruitKgs <- left_join(tbl(con, "ma_Pallet_DetailT"),
-                             left_join(tbl(con, "sw_ProductT"),
-                                       left_join(tbl(con, "sw_GradeT"),
-                                                 tbl(con, "sys_fi_Pool_TypeT"),
-                                                 by = "PoolTypeID") %>%
-                                         select(c(GradeID, GradeDesc, PoolByRule)),
-                                       by = "GradeID"),
-                             by = "ProductID") %>%
-    left_join(tbl(con, "ma_Export_Bin_DetailT"), by = "PalletDetailID") %>%
-    collect() %>%
+  looseFruitKgs <- tbl(con, "ma_Pallet_DetailT") |>
+    select(c(PalletDetailID, PalletID, ProductID, NoOfUnits, GrowerCompanyID, GraderBatchID)) |>
+    left_join(tbl(con, "sw_ProductT") |> select(c(ProductID, GradeID, TubesPerCarton, NetFruitWeight)),
+              by="ProductID") |>
+    left_join(tbl(con, "sw_GradeT") |> select(c(GradeID, GradeDesc, PoolTypeID)),
+              by="GradeID") |>
+    left_join(tbl(con, "sys_fi_Pool_TypeT") |> select(c(PoolTypeID, PoolByRule)),
+              by = "PoolTypeID") |>
+    left_join(tbl(con, "ma_Export_Bin_DetailT") |> select(c(ExportBinDetailID, PalletDetailID, KGWeight)),
+              by = "PalletDetailID") |>
+    collect() |>
     filter(PoolByRule == "KG",
            is.na(ExportBinDetailID),
-           GradeDesc != "Push Pack") %>%
-    mutate(looseKgs = NoOfUnits*NetFruitWeight) %>%
+           GradeDesc != "Push Pack") |>
+    mutate(looseKgs = NoOfUnits*NetFruitWeight) |>
     select(c(GraderBatchID, looseKgs)) %>%
     bind_rows(looseFruitKgs1) %>%
     group_by(GraderBatchID) %>%
@@ -107,7 +108,7 @@ graderFunction <- function(seasons, password) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackRepl",
                    UID = "abcadmin",
-                   PWD = password,
+                   PWD = "Trauts2018!",
                    Port = 1433
   )
 
