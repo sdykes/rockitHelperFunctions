@@ -9,7 +9,7 @@ graderFunction <- function(seasons, password) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackerRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
   #
@@ -108,7 +108,7 @@ graderFunction <- function(seasons, password) {
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackRepl",
                    UID = "abcadmin",
-                   PWD = "Trauts2018!",
+                   PWD = password,
                    Port = 1433
   )
 
