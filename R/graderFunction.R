@@ -184,7 +184,8 @@ graderFunction <- function(seasons, password) {
            Season = case_when(
              SeasonID == 6 ~ 2020,
              SeasonID == 7 ~ 2021,
-             TRUE ~ 2022)) %>%
+             SeasonID == 8 ~ 2022,
+             SeasonID == 9 ~ 2023)) %>%
     mutate(owner = str_trim(owner, side = "both"),
            owner = str_to_lower(owner),
            owner = str_replace_all(owner, " ", "")) %>%
@@ -319,7 +320,8 @@ binsHarvested <- function(seasons, password) {
               by = "MaturityID") %>%
     mutate(Season = case_when(SeasonID == 6 ~ 2020,
                               SeasonID == 7 ~ 2021,
-                              SeasonID == 8 ~ 2022),
+                              SeasonID == 8 ~ 2022,
+                              SeasonID == 9 ~ 2023),
            StorageType = case_when(StorageTypeID == 4 ~ "CA",
                                    StorageTypeID == 7 ~ "RA",
                                    TRUE ~ "RA")) %>%
