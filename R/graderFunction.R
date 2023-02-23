@@ -99,7 +99,7 @@ graderFunction <- function(seasons, password) {
     group_by(GraderBatchID) %>%
     summarise(fieldBinsTipped = sum(BinQty, na.rm=T))
 
-  dbDisconnect(con)
+  DBI::dbDisconnect(con)
 
 #==================================2016 data pull=================================================
 
@@ -261,7 +261,7 @@ binsHarvested <- function(seasons, password) {
   library(odbc)
   library(DBI)
 
-  con <- dbConnect(odbc(),
+  con <- DBI::dbConnect(odbc::odbc(),
                    Driver = "ODBC Driver 17 for SQL Server",
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackerRepl",
@@ -270,25 +270,39 @@ binsHarvested <- function(seasons, password) {
                    Port = 1433
   )
 
+  binsCompany2020 <- tbl(con, "ma_Bin_DeliveryT") %>%
+    filter(PresizeFlag == 0) %>%
+    dplyr::select(BinDeliveryID, SeasonID,
+                  FirstStorageSiteCompanyID) %>%
+    left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
+              by = c("FirstStorageSiteCompanyID" = "CompanyID")) %>%
+    mutate(StorageSite = case_when(CompanyName == "Te Ipu Packhouse (RO)" & SeasonID > 6 ~ "Te Ipu",
+                                   CompanyName == "Te Ipu Packhouse (RO)" & SeasonID <= 6 ~ "Cooper Street",
+                                   CompanyName == "Berl Property Ltd" ~ "Raupare Rd",
+                                   TRUE ~ "Raupare Rd")) %>%
+    dplyr::select(-c(SeasonID, CompanyName, FirstStorageSiteCompanyID)) %>%
+    collect()
+
   binsHarvested2020 <- tbl(con, "ma_Bin_DeliveryT") %>%
-    select(-c(BinTypeID,
-              VarietyID,
-              HoldReasonID,
-              TotalWeight,
-              PresizeProductID,
-              PresizeOutputFromGraderBatchID,
-              PresizeOutputFromGraderBatchMPILotID,
-              LastAction,
-              CreatedByUserName,
-              CreatedDateTime,
-              TimeStamp,
-              AverageBrix,
-              AverageFirmness,
-              RTESizeMatrixID,
-              EstimatedRTEsPerBin)) %>%
+    dplyr::select(BinDeliveryID,
+                  SeasonID,
+                  BinDeliveryNo,
+                  FarmID,
+                  BlockID,
+                  HarvestDate,
+                  NoOfBins,
+                  MaturityID,
+                  StorageTypeID,
+                  PresizeFlag,
+                  TagID,
+                  TreatmentID,
+                  Comment,
+                  ReceivedDate,
+                  PickNoID,
+                  GrowingTypeID) %>%
     left_join(tbl(con, "sw_Farm_BlockT") %>% select(BlockID, BlockCode, BlockName),
               by="BlockID") %>%
-    left_join(tbl(con, "sw_FarmT") %>% select(FarmID, FarmCode, FarmName, GrowerCompanyID),
+    left_join(tbl(con, "sw_FarmT") %>% select(c(FarmID, FarmCode, FarmName, GrowerCompanyID)),
               by = "FarmID") %>%
     left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
               by = c("GrowerCompanyID" = "CompanyID")) %>%
@@ -301,17 +315,11 @@ binsHarvested <- function(seasons, password) {
               by = "TagID") %>%
     left_join(tbl(con, "sw_Growing_TypeT") %>% select(c(GrowingTypeID, GrowingTypeDesc)),
               by = "GrowingTypeID") %>%
-    left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
-              by = c("FirstStorageSiteCompanyID" = "CompanyID")) %>%
     left_join(tbl(con, "sw_MaturityT") %>% select(c(MaturityID, MaturityCode)),
               by = "MaturityID") %>%
     mutate(Season = case_when(SeasonID == 6 ~ 2020,
                               SeasonID == 7 ~ 2021,
                               SeasonID == 8 ~ 2022),
-           StorageSite = case_when(CompanyName == "Rockit Packing Company Ltd (RA)" & Season > 2020 ~ "Te Ipu",
-                                   CompanyName == "Rockit Packing Company Ltd (RA)" & Season <= 2020 ~ "Cooper Street",
-                                   CompanyName == "Berl Property Ltd" ~ "Raupare Rd",
-                                   TRUE ~ "Raupare Rd"),
            StorageType = case_when(StorageTypeID == 4 ~ "CA",
                                    StorageTypeID == 7 ~ "RA",
                                    TRUE ~ "RA")) %>%
@@ -327,18 +335,19 @@ binsHarvested <- function(seasons, password) {
               TagID,
               GrowingTypeID,
               GrowerCompanyID,
-              FirstStorageSiteCompanyID,
-              MaturityID,
-              CompanyName)) %>%
+              MaturityID)) %>%
     relocate(Season, .after = ConsignmentNumber) %>%
     collect() %>%
     mutate(owner = str_trim(owner, side = "both"),
            owner = str_to_lower(owner),
            owner = str_replace_all(owner, " ", ""))
 
-  dbDisconnect(con)
+  DBI::dbDisconnect(con)
 
-  con <- dbConnect(odbc(),
+  bh2020 <- binsHarvested2020 |>
+    left_join(binsCompany2020, by = "BinDeliveryID")
+
+  con <- DBI::dbConnect(odbc::odbc(),
                    Driver = "ODBC Driver 17 for SQL Server",
                    Server = "abcrepldb.database.windows.net",
                    Database = "ABCPackRepl",
@@ -346,6 +355,23 @@ binsHarvested <- function(seasons, password) {
                    PWD = password,
                    Port = 1433
   )
+
+  binsCompany2019 <- tbl(con, "ma_BinT") %>%
+    filter(PresizeFlag == 0) %>%
+    select(c(BinID, FirstStorageSiteCompanyID))%>%
+    left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
+              by = c("FirstStorageSiteCompanyID" = "CompanyID")) %>%
+    mutate(StorageSite = case_when(CompanyName == "Rockit Packing Company Ltd" ~ "Cooper Street",
+                                   CompanyName == "Berl Property Ltd" ~ "Raupare Rd",
+                                   CompanyName == "Bostock New Zealand" ~ "Henderson Road",
+                                   CompanyName == "T & G (Apollo)" ~ "T&G Whakatu",
+                                   CompanyName == "Everest Kool SolutioNZ" ~ "Everest Kool Omahu Rd",
+                                   CompanyName == "Crasborn Fresh Harvest " ~ "FreshMax Omahu Road",
+                                   CompanyName == "2019 Crasborn Fresh Harvest" ~ "Raupare Rd",
+                                   TRUE ~ CompanyName)) %>%
+    dplyr::select(-c(FirstStorageSiteCompanyID, CompanyName)) %>%
+    rename(BinDeliveryID = BinID) |>
+    collect()
 
   binsHarvested2019 <- tbl(con, "ma_BinT") %>%
     filter(PresizeFlag == 0) %>%
@@ -359,27 +385,17 @@ binsHarvested <- function(seasons, password) {
     left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
               by = c("GrowerCompanyID" = "CompanyID")) %>%
     rename(owner = CompanyName) %>%
-    left_join(tbl(con, "sw_CompanyT") %>% select(c(CompanyID, CompanyName)),
-              by = c("FirstStorageSiteCompanyID" = "CompanyID")) %>%
     left_join(tbl(con, "sw_ESPT") %>% select(c(ESPID, ESPCode)),
               by = "ESPID") %>%
-    mutate(StorageSite = case_when(CompanyName == "Rockit Packing Company Ltd" ~ "Cooper Street",
-                                   CompanyName == "Berl Property Ltd" ~ "Raupare Rd",
-                                   CompanyName == "Bostock New Zealand" ~ "Henderson Road",
-                                   CompanyName == "T & G (Apollo)" ~ "T&G Whakatu",
-                                   CompanyName == "Everest Kool SolutioNZ" ~ "Everest Kool Omahu Rd",
-                                   CompanyName == "Crasborn Fresh Harvest " ~ "FreshMax Omahu Road",
-                                   CompanyName == "2019 Crasborn Fresh Harvest" ~ "Raupare Rd",
-                                   TRUE ~ CompanyName),
-           Season = case_when(SeasonID == 2 ~ 2016,
+    mutate(Season = case_when(SeasonID == 2 ~ 2016,
                               SeasonID == 3 ~ 2017,
                               SeasonID == 4 ~ 2018,
                               SeasonID == 5 ~ 2019),
            StorageType = case_when(StorageTypeID == 4 ~ "CA",
                                    StorageTypeID == 7 ~ "RA",
                                    TRUE ~ "RA")) %>%
-    select(-c(FarmID, BlockID, StorageTypeID, FirstStorageSiteCompanyID,
-              SeasonID, ESPID, CompanyName, PresizeFlag, GrowerCompanyID)) %>%
+    dplyr::select(-c(FarmID, BlockID, StorageTypeID, SeasonID, ESPID,
+              PresizeFlag, GrowerCompanyID)) %>%
     rename(BinDeliveryID = BinID,
            ConsignmentNumber = BinNo,
            ReceivedDate = BinReceivedDate,
@@ -389,14 +405,13 @@ binsHarvested <- function(seasons, password) {
            TreatmentDesc = as.character(NA),
            TagDesc = as.character(NA),
            GrowingTypeDesc = as.character(NA)) %>%
-    select(c(BinDeliveryID,
+    dplyr::select(c(BinDeliveryID,
              ConsignmentNumber,
              Season,
              HarvestDate,
              NoOfBins,
              Comment,
              ReceivedDate,
-             ReceivedTime,
              BlockCode,
              BlockName,
              FarmCode,
@@ -407,17 +422,19 @@ binsHarvested <- function(seasons, password) {
              TagDesc,
              GrowingTypeDesc,
              MaturityCode,
-             StorageSite,
              StorageType)) %>%
     collect() %>%
     mutate(owner = str_trim(owner, side = "both"),
            owner = str_to_lower(owner),
            owner = str_replace_all(owner, " ", ""))
 
-  dbDisconnect(con)
+  DBI::dbDisconnect(con)
 
-  binsHarvested <- binsHarvested2019 %>%
-    bind_rows(binsHarvested2020) %>%
+  bh2019 <- binsHarvested2019 |>
+    left_join(binsCompany2019, by = "BinDeliveryID")
+
+  binsHarvested <- bh2019 %>%
+    bind_rows(bh2020) %>%
     filter(Season %in% {{seasons}})
 
   return(binsHarvested)
