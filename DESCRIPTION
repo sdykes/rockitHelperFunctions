@@ -1,11 +1,18 @@
 Package: rockitHelperFunctions
 Type: Package
-Title: What the Package Does (Title Case)
+Title: To provide helper functions for sourcing data from various Rockit data repositories
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Stuart Dykes <stuart.dykes@rockitapple.com>
+Maintainer: Stuart Dykes <stuart.dykes@rockitapple.com>
+Description: Takes a vector of seasons as an input and returns a range of data depending on the function.
+    Currently three functions are defined which return summary data frames for the seasons specified in the 
+    input
+License: MIT
 Encoding: UTF-8
+Imports: 
+    dplyr, 
+    DBI, 
+    odbc, 
+    tidyr
 LazyData: true
+RoxygenNote: 7.2.3
