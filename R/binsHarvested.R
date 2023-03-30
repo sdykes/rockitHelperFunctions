@@ -180,6 +180,7 @@ binsHarvested <- function(seasons, password) {
                     GrowingTypeDesc,
                     MaturityCode,
                     StorageType)) |>
+    dplyr::filter(Season == lubridate::year(HarvestDate)) |>
     dplyr::collect() |>
     dplyr::mutate(owner = stringr::str_trim(owner, side = "both"),
            owner = stringr::str_to_lower(owner),

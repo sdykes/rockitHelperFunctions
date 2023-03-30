@@ -2,7 +2,7 @@
 % Please edit documentation in R/graderFunction.R
 \name{graderFunction}
 \alias{graderFunction}
-\title{Greder batch summary function}
+\title{Grader batch summary function}
 \usage{
 graderFunction(seasons, password)
 }
