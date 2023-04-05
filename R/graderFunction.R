@@ -179,9 +179,9 @@ graderFunction <- function(seasons, password) {
                StorageTypeID == 4 ~ "CA",
                StorageTypeID == 7 ~ "RA",
                TRUE ~ "RA")) |>
-      dplyr::mutate(owner = str_trim(owner, side = "both"),
-             owner = str_to_lower(owner),
-             owner = str_replace_all(owner, " ", "")) |>
+      dplyr::mutate(owner = stringr::str_trim(owner, side = "both"),
+             owner = stringr::str_to_lower(owner),
+             owner = stringr::str_replace_all(owner, " ", "")) |>
       dplyr::mutate(ifelse(storageDays < 50 & StorageType == "CA", "RA", "RA")) |>
       dplyr::select(GraderBatchID,
              GraderBatchNo,
@@ -300,9 +300,9 @@ graderFunction <- function(seasons, password) {
              packOut = 1-rejectKgs/InputKgs,
              storageDays = as.numeric(PackDate - HarvestDate),
              GraderBatchNo = as.integer(GraderBatchNo)) |>
-      dplyr::mutate(owner = str_trim(owner, side = "both"),
-             owner = str_to_lower(owner),
-             owner = str_replace_all(owner, " ", "")) |>
+      dplyr::mutate(owner = stringr::str_trim(owner, side = "both"),
+             owner = stringr::str_to_lower(owner),
+             owner = stringr::str_replace_all(owner, " ", "")) |>
       dplyr::select(-c(SeasonID,StorageTypeDesc, NoOfBins)) |>
       dplyr::rename(MaturityCode = ESPCode,
              fieldBinsTipped = BinQty)
