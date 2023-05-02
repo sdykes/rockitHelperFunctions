@@ -30,38 +30,38 @@ defectAssessment <- function(seasons, password) {
                           Port = 1433
     )
 
-    defect_assessments <- dplyr::left_join(dplyr::tbl(con,"qa_Assessment_DefectT") %>%
+    defect_assessments <- dplyr::left_join(dplyr::tbl(con,"qa_Assessment_DefectT") |>
                                       dplyr::select(c(AssessmentDefectID, AssessmentID, DefectID, DefectQty)),
-                                    dplyr::tbl(con, "qa_AssessmentT") %>%
+                                    dplyr::tbl(con, "qa_AssessmentT") |>
                                       dplyr::select(c(AssessmentID, GraderBatchID, BlockID, TemplateID, FarmID,
                                                GradeID, SampleQty, SeasonID)),
-                                    by = "AssessmentID") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") %>% dplyr::select(c(TemplateID, TemplateName)),
-                by = "TemplateID") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_DefectT") %>% dplyr::select(c(DefectID, Defect)),
-                by = "DefectID") %>%
+                                    by = "AssessmentID") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") |> dplyr::select(c(TemplateID, TemplateName)),
+                by = "TemplateID") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_DefectT") |> dplyr::select(c(DefectID, Defect)),
+                by = "DefectID") |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 6 ~ 2020,
                                 SeasonID == 7 ~ 2021,
                                 SeasonID == 8 ~ 2022,
-                                SeasonID == 9 ~ 2023)) %>%
+                                SeasonID == 9 ~ 2023)) |>
       dplyr::filter(TemplateName %in% {{selectedTemplates}},
-             Season %in% {{seasons}}) %>%
-      dplyr::select(-c(TemplateID, SeasonID, GradeID, FarmID, BlockID, DefectID)) %>%
+             Season %in% {{seasons}}) |>
+      dplyr::select(-c(TemplateID, SeasonID, GradeID, FarmID, BlockID, DefectID)) |>
       dplyr::collect()
 
-    sampleQty <- dplyr::tbl(con, "qa_AssessmentT") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") %>% dplyr::select(c(TemplateID, TemplateName)),
-                by = "TemplateID") %>%
+    sampleQty <- dplyr::tbl(con, "qa_AssessmentT") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") |> dplyr::select(c(TemplateID, TemplateName)),
+                by = "TemplateID") |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 6 ~ 2020,
                                 SeasonID == 7 ~ 2021,
                                 SeasonID == 8 ~ 2022,
-                                SeasonID == 9 ~ 2023)) %>%
+                                SeasonID == 9 ~ 2023)) |>
       dplyr::filter(!is.null(GraderBatchID),
              TemplateName %in% {{selectedTemplates}},
-             Season %in% {{seasons}}) %>%
-      dplyr::group_by(Season, GraderBatchID) %>%
+             Season %in% {{seasons}}) |>
+      dplyr::group_by(Season, GraderBatchID) |>
       dplyr::summarise(sampleQty = sum(SampleQty, na.rm=T),
-                .groups = "drop") %>%
+                .groups = "drop") |>
       dplyr::collect()
 
     DBI::dbDisconnect(con)
@@ -98,38 +98,38 @@ defectAssessment <- function(seasons, password) {
     )
 
 
-    defect_assessments2019 <- dplyr::left_join(dplyr::tbl(con,"qa_Assessment_DefectT") %>%
+    defect_assessments2019 <- dplyr::left_join(dplyr::tbl(con,"qa_Assessment_DefectT") |>
                                           dplyr::select(c(AssessmentDefectID, AssessmentID, DefectID, DefectQty)),
-                                        dplyr::tbl(con, "qa_AssessmentT") %>%
+                                        dplyr::tbl(con, "qa_AssessmentT") |>
                                           dplyr::select(c(AssessmentID, GraderBatchID, BlockID, TemplateID,
                                                    FarmID, GradeID, SampleQty, SeasonID)),
-                                        by = "AssessmentID") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") %>% dplyr::select(c(TemplateID, TemplateName)),
-                by = "TemplateID") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_DefectT") %>% dplyr::select(c(DefectID, Defect)),
-                by = "DefectID") %>%
+                                        by = "AssessmentID") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") |> dplyr::select(c(TemplateID, TemplateName)),
+                by = "TemplateID") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_DefectT") |> dplyr::select(c(DefectID, Defect)),
+                by = "DefectID") |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 2 ~ 2016,
                                 SeasonID == 3 ~ 2017,
                                 SeasonID == 4 ~ 2018,
-                                SeasonID == 5 ~ 2019)) %>%
-      dplyr::select(-c(TemplateID, SeasonID, GradeID, FarmID, BlockID, DefectID)) %>%
+                                SeasonID == 5 ~ 2019)) |>
+      dplyr::select(-c(TemplateID, SeasonID, GradeID, FarmID, BlockID, DefectID)) |>
       dplyr::filter(TemplateName %in% {{selectedTemplates2019}},
-             Season %in% {{seasons}}) %>%
+             Season %in% {{seasons}}) |>
       dplyr::collect()
 
-    sampleQty2019 <- dplyr::tbl(con, "qa_AssessmentT") %>%
-      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") %>% dplyr::select(c(TemplateID, TemplateName)),
-                by = "TemplateID") %>%
+    sampleQty2019 <- dplyr::tbl(con, "qa_AssessmentT") |>
+      dplyr::left_join(dplyr::tbl(con, "qa_TemplateT") |> dplyr::select(c(TemplateID, TemplateName)),
+                by = "TemplateID") |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 2 ~ 2016,
                                 SeasonID == 3 ~ 2017,
                                 SeasonID == 4 ~ 2018,
-                                SeasonID == 5 ~ 2019)) %>%
+                                SeasonID == 5 ~ 2019)) |>
       dplyr::filter(!is.null(GraderBatchID),
              TemplateName %in% {{selectedTemplates2019}},
-             Season %in% {{seasons}}) %>%
-      dplyr::group_by(Season, GraderBatchID) %>%
+             Season %in% {{seasons}}) |>
+      dplyr::group_by(Season, GraderBatchID) |>
       dplyr::summarise(sampleQty = sum(SampleQty, na.rm=T),
-                .groups = "drop") %>%
+                .groups = "drop") |>
       dplyr::collect()
 
     DBI::dbDisconnect(con)
@@ -157,20 +157,20 @@ defectAssessment <- function(seasons, password) {
 
   gbd <- graderFunction(seasons, password)
 
-  sq <- sampleQty2019 %>%
+  sq <- sampleQty2019 |>
     bind_rows(sampleQty)
 
-  defAss <- defect_assessments2019 %>%
+  defAss <- defect_assessments2019 |>
     bind_rows(defect_assessments)
 
-  da <- defAss %>%
-    dplyr::group_by(Season, GraderBatchID, Defect) %>%
+  da <- defAss |>
+    dplyr::group_by(Season, GraderBatchID, Defect) |>
     dplyr::summarise(defectQty = sum(DefectQty),
-              .groups = "drop") %>%
-    dplyr::left_join(sq, by=c("Season", "GraderBatchID")) %>%
-    dplyr::left_join(gbd, by = c("Season", "GraderBatchID")) %>%
+              .groups = "drop") |>
+    dplyr::left_join(sq, by=c("Season", "GraderBatchID")) |>
+    dplyr::left_join(gbd, by = c("Season", "GraderBatchID")) |>
     dplyr::mutate(proportion = (1-packOut)*defectQty/sampleQty,
-           Defect = ifelse(Defect == "Russet Cheek" | Defect == "Russet Stem", "Russet", Defect)) %>%
+           Defect = ifelse(Defect == "Russet Cheek" | Defect == "Russet Stem", "Russet", Defect)) |>
     dplyr::filter(!is.na(FarmName))
 
   return(da)
