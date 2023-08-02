@@ -5,7 +5,7 @@
 #'
 #' @details
 #' The `growerRTE` function is a helper function to return a useful tibble to allow more detailed analysis
-#' of growerRTEs for the various pack categories (i.e. tubes packed, re-packs, export bins and pre-sized bins). The function returns all grower RTEs by GraderBatchID.
+#' of growerRTEs for the various pack categories (i.e. tubes packed, re-packs, export bins and pre-sized bins). The function returns all grower RTEs by GraderBatchID and orchard and block information.
 #'
 #' @param seasons a vector of the seasons to be returned.
 #' @param password the password string to the SQL database (see administrator for the password string)
