@@ -9,7 +9,7 @@ binsHarvested(seasons, password)
 \arguments{
 \item{seasons}{a vector of the seasons to be returned.}
 
-\item{password}{the password to the SQL database (see administrator for the password string)}
+\item{password}{a text string containing the password to the SQL database (see administrator for the password string)}
 }
 \value{
 a tibble with each row representing a specific bin consignment.
@@ -23,5 +23,5 @@ of bins submitted into the ABC system (at the gatehouse). The function returns a
 and Bin delivery number.
 }
 \seealso{
-[graderFunction()], [defectAssessment()]
+[graderFunction()], [defectAssessment()], [growerRTE()]
 }

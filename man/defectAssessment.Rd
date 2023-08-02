@@ -9,7 +9,7 @@ defectAssessment(seasons, password)
 \arguments{
 \item{seasons}{a vector of the seasons to be returned.}
 
-\item{password}{the password to the SQL database (see administrator for the password string)}
+\item{password}{a text string containing the password to the SQL database (see administrator for the password string)}
 }
 \value{
 a tibble with each row representing a specific defect for a specific grader batch.
@@ -23,5 +23,5 @@ The function returns all recorded defects by season and grader batch.  It also i
 deliver the defect proportion of the entire batch.
 }
 \seealso{
-[graderFunction()], [binsHarvested()]
+[graderFunction()], [binsHarvested()], [growerRTE()]
 }
