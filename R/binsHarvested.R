@@ -9,7 +9,7 @@
 #' and Bin delivery number.
 #'
 #' @param seasons a vector of the seasons to be returned.
-#' @param password the password to the SQL database (see administrator for the password string)
+#' @param password a text string containing the password to the SQL database (see administrator for the password string)
 #' @return a tibble with each row representing a specific bin consignment.
 #' @export
 #' @seealso [graderFunction()], [defectAssessment()], [growerRTE()]

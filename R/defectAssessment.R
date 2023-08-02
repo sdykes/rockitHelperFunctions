@@ -9,7 +9,7 @@
 #' deliver the defect proportion of the entire batch.
 #'
 #' @param seasons a vector of the seasons to be returned.
-#' @param password the password to the SQL database (see administrator for the password string)
+#' @param password a text string containing the password to the SQL database (see administrator for the password string)
 #' @return a tibble with each row representing a specific defect for a specific grader batch.
 #' @export
 #' @seealso [graderFunction()], [binsHarvested()], [growerRTE()]

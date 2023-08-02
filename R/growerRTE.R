@@ -1,4 +1,4 @@
-#' @title Grower RTE summary
+#' @title Grower RTE summary function
 #'
 #' @description
 #' `growerRTEs` returns a tibble which contains the summary information on grower RTEs including the growerRTE category
