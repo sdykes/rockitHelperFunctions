@@ -12,7 +12,7 @@
 #' @param password the password to the SQL database (see administrator for the password string)
 #' @return a tibble with each row representing a specific bin consignment.
 #' @export
-#' @seealso [binsHarvested()], [defectAssessment()]
+#' @seealso [binsHarvested()], [defectAssessment()], [growerRTE()]
 
 graderFunction <- function(seasons, password) {
 

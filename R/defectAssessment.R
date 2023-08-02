@@ -12,7 +12,7 @@
 #' @param password the password to the SQL database (see administrator for the password string)
 #' @return a tibble with each row representing a specific defect for a specific grader batch.
 #' @export
-#' @seealso [graderFunction()], [binsHarvested()]
+#' @seealso [graderFunction()], [binsHarvested()], [growerRTE()]
 
 defectAssessment <- function(seasons, password) {
 
