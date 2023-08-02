@@ -153,11 +153,12 @@ growerRTE <- function(seasons, password) {
     dplyr::filter(SeasonDesc %in% {{seasons}}) |>
     dplyr::left_join(tubeGrowerRTEs, by = "GraderBatchID") |>
     dplyr::left_join(presizeGrowerRTEs, by = "GraderBatchID") |>
-    dplyr::left_join(repackGrowerRTEs, by = "GraderBatchID") |>
-    dplyr::mutate(dplyr::across(.cols = c(colnames(growerRTEs)[[5]]:colnames(growerRTEs)[[length(growerRTEs)]]),
-                                ~tidyr::replace_na(., 0)))
+    dplyr::left_join(repackGrowerRTEs, by = "GraderBatchID")
+
 
   growerRTEsByGraderBatch <- growerRTEs |>
+    dplyr::mutate(dplyr::across(.cols = c(colnames(growerRTEs)[[5]]:colnames(growerRTEs)[[length(growerRTEs)]]),
+                                ~tidyr::replace_na(., 0))) |>
     dplyr::rowwise() |>
     dplyr::mutate(exportBins = sum(dplyr::c_across(tidyselect::starts_with("ROC999"))),
                   japanTrayPacks = round(sum(dplyr::c_across(tidyselect::starts_with("JAP"))), 0),
