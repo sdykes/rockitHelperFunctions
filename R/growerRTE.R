@@ -13,6 +13,8 @@
 #' @export
 #' @seealso [graderFunction()], [defectAssessment()], [binsHarvested()]
 
+# function to determine grower RTEs
+
 growerRTE <- function(seasons, password) {
 
   con <- DBI::dbConnect(odbc::odbc(),

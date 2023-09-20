@@ -14,6 +14,7 @@
 #' @export
 #' @seealso [graderFunction()], [defectAssessment()], [growerRTE()]
 
+# function to determine bins harvested
 
 binsHarvested <- function(seasons, password) {
 

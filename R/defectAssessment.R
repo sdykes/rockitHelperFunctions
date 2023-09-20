@@ -14,6 +14,8 @@
 #' @export
 #' @seealso [graderFunction()], [binsHarvested()], [growerRTE()]
 
+# Function to deliver defect data
+
 defectAssessment <- function(seasons, password) {
 
   selectedTemplates <- c("Grade Analysis", "Packer Rejects", "Defect Sorter Rejects", "Class 1.5 Analysis")

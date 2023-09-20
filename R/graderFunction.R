@@ -14,6 +14,8 @@
 #' @export
 #' @seealso [binsHarvested()], [defectAssessment()], [growerRTE()]
 
+# Function to determine grader batch data
+
 graderFunction <- function(seasons, password) {
 
   if(max(seasons) >= 2020) {
