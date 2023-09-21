@@ -35,7 +35,7 @@ growerRTE <- function(seasons, password) {
               by = "FarmID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockName, BlockCode)),
               by = "BlockID") |>
-    dplyr::left_join(dplyr::tbl(con, "sw_ProductT") |> dplyr::filter(ActiveFlag == 1) |>
+    dplyr::left_join(dplyr::tbl(con, "sw_ProductT") |>
                 dplyr::select(c(ProductID, ProductDesc, TubesPerCarton, PackTypeID,
                                 TubeTypeID, PresizeFlag, SampleFlag, CountID, DesignationID, SizeID)),
               by = "ProductID") |>
@@ -127,7 +127,18 @@ growerRTE <- function(seasons, password) {
     tidyr::pivot_wider(id_cols = c("GraderBatchID"),
                        names_from = "ProductCode",
                        values_from = "tubeGrowerRTEs") |>
-    dplyr::mutate(dplyr::across(.cols = 2:33, ~tidyr::replace_na(.,0)))
+    dplyr::mutate(dplyr::across(.cols = everything(), ~tidyr::replace_na(.,0)))
+
+# summarise the tube RTE for aggregation below
+
+  sumTubeGrowerRTEs <- tubeGrowerRTEs |>
+    dplyr::rowwise() |>
+    dplyr::mutate(exportBins = sum(dplyr::c_across(tidyselect::starts_with("ROC999"))),
+                  japanTrayPacks = round(sum(dplyr::c_across(tidyselect::starts_with("JAP"))), 0),
+                  tempZPacks = dplyr::if_else(GraderBatchID >= 2430, sum(dplyr::c_across(tidyselect::starts_with("RKT"))),0),
+                  tubePacks = round(sum(dplyr::c_across(2:ncol(tubeGrowerRTEs)))-exportBins-japanTrayPacks-tempZPacks,0)+
+                    round(dplyr::if_else(GraderBatchID < 2430, sum(dplyr::c_across(tidyselect::starts_with("RKT"))),0),0)) |>
+    dplyr::select(c(GraderBatchID, tubePacks, exportBins, japanTrayPacks, tempZPacks))
 
 # calculation of Pre-size grower RTEs
 
@@ -140,6 +151,7 @@ growerRTE <- function(seasons, password) {
     dplyr::summarise(PSgrowerRTEs = round(sum(PSgrowerRTEs),0),
                      .groups = "drop")
 
+
 # Calculation of repack RTEs
 
   repackGrowerRTEs <- RepackInput |>
@@ -149,26 +161,20 @@ growerRTE <- function(seasons, password) {
     dplyr::summarise(repackRTEs = round(sum(repackRTEs, na.rm=T),0),
                      .groups = "drop")
 
+
 # Aggregation of grower RTEs
 
   growerRTEs <- GraderBatch |>
     dplyr::filter(SeasonDesc %in% {{seasons}}) |>
-    dplyr::left_join(tubeGrowerRTEs, by = "GraderBatchID") |>
+    dplyr::left_join(sumTubeGrowerRTEs, by = "GraderBatchID") |>
     dplyr::left_join(presizeGrowerRTEs, by = "GraderBatchID") |>
-    dplyr::left_join(repackGrowerRTEs, by = "GraderBatchID")
+    dplyr::left_join(repackGrowerRTEs, by = "GraderBatchID") |>
+    dplyr::mutate(across(.cols = c(PSgrowerRTEs, repackRTEs), ~tidyr::replace_na(., 0)))
 
 
   growerRTEsByGraderBatch <- growerRTEs |>
-    dplyr::mutate(dplyr::across(.cols = c(colnames(growerRTEs)[[5]]:colnames(growerRTEs)[[length(growerRTEs)]]),
-                                ~tidyr::replace_na(., 0))) |>
     dplyr::rowwise() |>
-    dplyr::mutate(exportBins = sum(dplyr::c_across(tidyselect::starts_with("ROC999"))),
-                  japanTrayPacks = round(sum(dplyr::c_across(tidyselect::starts_with("JAP"))), 0),
-                  tempZPacks = sum(dplyr::c_across(tidyselect::starts_with("RKT"))),
-                  tubePacks = round(sum(dplyr::c_across(IDN06416463156:RKT21070363117))-exportBins-japanTrayPacks-tempZPacks, 0)) |>
-    dplyr::select(-c(colnames(growerRTEs)[[5]]:colnames(growerRTEs)[[length(growerRTEs)-2]])) |>
-    dplyr::mutate(totalGrowerRTEs = sum(dplyr::c_across(PSgrowerRTEs:tubePacks))) |>
-    dplyr::relocate(tubePacks, .before = PSgrowerRTEs)
+    dplyr::mutate(totalGrowerRTEs = sum(dplyr::c_across(5:10)))
 
   return(growerRTEsByGraderBatch)
 
