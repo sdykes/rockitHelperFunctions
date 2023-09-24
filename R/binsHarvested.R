@@ -57,10 +57,13 @@ binsHarvested <- function(seasons, password) {
                   ReceivedDate,
                   PickNoID,
                   GrowingTypeID) |>
-    dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(BlockID, BlockCode, BlockName),
+    dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(BlockID, BlockCode, BlockName, SubdivisionID),
               by="BlockID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_FarmT") |> dplyr::select(c(FarmID, FarmCode, FarmName, GrowerCompanyID)),
               by = "FarmID") |>
+    dplyr::left_join(dplyr::tbl(con, "sw_SubdivisionT") |> dplyr::select(c(SubdivisionID, SubdivisionCode,
+                                                                         SubdivisionDesc)),
+                     by = "SubdivisionID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_CompanyT") |> dplyr::select(c(CompanyID, CompanyName)),
               by = c("GrowerCompanyID" = "CompanyID")) |>
     dplyr::rename(owner = CompanyName) |>
@@ -87,6 +90,7 @@ binsHarvested <- function(seasons, password) {
               PresizeFlag,
               FarmID,
               BlockID,
+              SubdivisionID,
               StorageTypeID,
               PickNoID,
               TreatmentID,
@@ -137,14 +141,16 @@ binsHarvested <- function(seasons, password) {
              StorageTypeID, PresizeFlag, FirstStorageSiteCompanyID, Comment,
              ESPID, BinReceivedDate))|>
     dplyr::left_join(dplyr::tbl(con, "sw_FarmT") |> dplyr::select(FarmID, FarmCode, FarmName, GrowerCompanyID),
-              by = "FarmID") |>
-    dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName)),
-              by = "BlockID") |>
+                     by = "FarmID") |>
+    dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName, SubdivisionID)),
+                     by = "BlockID") |>
+    dplyr::left_join(dplyr::tbl(con, "sw_SubdivisionT") |> dplyr::select(c(SubdivisionID, SubdivisionCode, SubdivisionDesc)),
+                     by = "SubdivisionID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_CompanyT") |> dplyr::select(c(CompanyID, CompanyName)),
-              by = c("GrowerCompanyID" = "CompanyID")) |>
+                     by = c("GrowerCompanyID" = "CompanyID")) |>
     dplyr::rename(owner = CompanyName) |>
     dplyr::left_join(dplyr::tbl(con, "sw_ESPT") |> dplyr::select(c(ESPID, ESPCode)),
-              by = "ESPID") |>
+                     by = "ESPID") |>
     dplyr::mutate(Season = dplyr::case_when(SeasonID == 2 ~ 2016,
                               SeasonID == 3 ~ 2017,
                               SeasonID == 4 ~ 2018,
@@ -174,6 +180,8 @@ binsHarvested <- function(seasons, password) {
                     BlockName,
                     FarmCode,
                     FarmName,
+                    SubdivisionCode,
+                    SubdivisionDesc,
                     owner,
                     PickNoDesc,
                     TreatmentDesc,
