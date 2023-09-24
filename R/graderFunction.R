@@ -69,10 +69,12 @@ graderFunction <- function(seasons, password) {
     GraderBatchT <- dplyr::left_join(dplyr::tbl(con, "ma_Grader_BatchT"),
                               dplyr::tbl(con, "sw_FarmT") |> dplyr::select(c(FarmID, FarmCode, FarmName)),
                               by = "FarmID") |>
-      dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName)), by ="BlockID") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName,SubdivisionID)), by ="BlockID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_MaturityT") |> dplyr::select(c(MaturityID, MaturityCode)), by = "MaturityID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_CompanyT") |> dplyr::select(c(CompanyID, CompanyName)), by = c("GrowerCompanyID" = "CompanyID")) |>
       dplyr::left_join(dplyr::tbl(con, "ma_ShiftT") |> dplyr::select(ShiftID, ShiftCode), by = "ShiftID") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_SubdivisionT") |> dplyr::select(c(SubdivisionID, SubdivisionCode, SubdivisionDesc)),
+                       by = "SubdivisionID") |>
       dplyr::rename(owner = CompanyName) |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 6 ~ 2020,
                                 SeasonID == 7 ~ 2021,
@@ -94,6 +96,8 @@ graderFunction <- function(seasons, password) {
                       PickNoID,
                       FarmCode,
                       FarmName,
+                      SubdivisionCode,
+                      SubdivisionDesc,
                       BlockCode,
                       BlockName,
                       owner,
@@ -191,6 +195,8 @@ graderFunction <- function(seasons, password) {
              owner,
              FarmCode,
              FarmName,
+             SubdivisionCode,
+             SubdivisionDesc,
              BlockCode,
              BlockName,
              HarvestDate,
@@ -204,16 +210,20 @@ graderFunction <- function(seasons, password) {
              MaturityCode,
              StorageType)
   } else {
-
+#
+# if the season don't include anything >= 2020 then return an empyty data frame
+#
     graderBatchData2020 <- tibble::tibble(
-      GraderBatchID = interger(),
+      GraderBatchID = integer(),
       GraderBatchNo = integer(),
       Season = numeric(),
       owner = character(),
       FarmCode = character(),
       FarmName = character(),
-      BlockCode = charcater(),
-      BlockName = charcater(),
+      SubdivisionCode = character(),
+      SubdivisionDesc = character(),
+      BlockCode = character(),
+      BlockName = character(),
       HarvestDate = date(),
       PackDate = date(),
       ShiftCode = character(),
@@ -224,7 +234,6 @@ graderFunction <- function(seasons, password) {
       packOut = numeric(),
       MaturityCode = character(),
       StorageType = character()
-
     )
   }
   #
@@ -240,8 +249,8 @@ graderFunction <- function(seasons, password) {
                           Port = 1433
     )
 
-    GraderBatchT2019 <- dplyr::left_join(dplyr::tbl(con, "ma_Grader_BatchT"),
-                                  dplyr::tbl(con, "sw_FarmT") |> dplyr::select(c(FarmID, FarmCode, FarmName, GrowerCompanyID)),
+    GraderBatchT2019 <- dplyr::tbl(con, "ma_Grader_BatchT") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_FarmT") |> dplyr::select(c(FarmID, FarmCode, FarmName, GrowerCompanyID)),
                                   by = "FarmID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_CompanyT") |> dplyr::select(CompanyID, CompanyName),
                 by = c("GrowerCompanyID" = "CompanyID")) |>
@@ -273,8 +282,10 @@ graderFunction <- function(seasons, password) {
                   dplyr::select(c(BinID, SeasonID, FarmID, BlockID, NoOfBins, HarvestDate,
                            StorageTypeID, PresizeFlag, FirstStorageSiteCompanyID, ESPID)),
                 by = "BinID")|>
-      dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName)),
-                by = "BlockID") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_Farm_BlockT") |> dplyr::select(c(BlockID, BlockCode, BlockName, SubdivisionID)),
+                       by = "BlockID") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_SubdivisionT") |> dplyr::select(c(SubdivisionID, SubdivisionCode, SubdivisionDesc)),
+                       by = "SubdivisionID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_Storage_TypeT") |> dplyr::select(c(StorageTypeID, StorageTypeDesc)),
                 by = "StorageTypeID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_CompanyT") |> dplyr::select(c(CompanyID, CompanyName)),
@@ -289,8 +300,8 @@ graderFunction <- function(seasons, password) {
                                      CompanyName == "Crasborn Fresh Harvest " ~ "FreshMax Omahu Road",
                                      CompanyName == "2019 Crasborn Fresh Harvest" ~ "Raupare Rd",
                                      TRUE ~ CompanyName)) |>
-      dplyr::select(-c(FarmID, BlockID, StorageTypeID, FirstStorageSiteCompanyID, ESPID, CompanyName )) |>
-      arrange(GraderBatchID) |>
+      dplyr::select(-c(FarmID, BlockID, SubdivisionID, StorageTypeID,
+                       FirstStorageSiteCompanyID, ESPID, CompanyName )) |>
       dplyr::collect()
 
     graderBatchData2019 <- GraderBatchT2019 |>
@@ -312,29 +323,32 @@ graderFunction <- function(seasons, password) {
              fieldBinsTipped = BinQty)
 
     DBI::dbDisconnect(con)
+#
+# if the season don't include anything < 2020 then return an empty data frame
+#
   } else {
 
     graderBatchData2019 <- tibble::tibble(
       GraderBatchID = integer(),
       GraderBatchNo = integer(),
       Season = numeric(),
-      PackDate = date(),
-      InputKgs = numeric(),
-      ShiftCode = character(),
-      rejectKgs = numeric(),
       owner = character(),
       FarmCode = character(),
       FarmName = character(),
-      fieldBinsTipped = numeric(),
-      HarvestDate = date(),
-      PresizeFlag = logical(),
+      SubdivisionCode = character(),
+      SubdivisionDesc = character(),
       BlockCode = character(),
       BlockName = character(),
-      MaturityCode = character(),
-      StorageSite = character(),
-      StorageType = character(),
+      HarvestDate = date(),
+      PackDate = date(),
+      ShiftCode = character(),
+      storageDays = numeric(),
+      fieldBinsTipped = numeric(),
+      InputKgs = numeric(),
+      rejectKgs = numeric(),
       packOut = numeric(),
-      storageDays = numeric()
+      MaturityCode = character(),
+      StorageType = character()
     )
 
   }
@@ -350,6 +364,8 @@ graderFunction <- function(seasons, password) {
              FarmName,
              BlockCode,
              BlockName,
+             SubdivisionCode,
+             SubdivisionDesc,
              HarvestDate,
              PackDate,
              ShiftCode,
