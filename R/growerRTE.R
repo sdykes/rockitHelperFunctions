@@ -136,8 +136,7 @@ growerRTE <- function(seasons, password) {
     dplyr::mutate(exportBins = sum(dplyr::c_across(tidyselect::starts_with("ROC999"))),
                   japanTrayPacks = round(sum(dplyr::c_across(tidyselect::starts_with("JAP"))), 0),
                   tempZPacks = dplyr::if_else(GraderBatchID >= 2430, sum(dplyr::c_across(tidyselect::starts_with("RKT"))),0),
-                  tubePacks = round(sum(dplyr::c_across(2:ncol(tubeGrowerRTEs)))-exportBins-japanTrayPacks-tempZPacks,0)+
-                    round(dplyr::if_else(GraderBatchID < 2430, sum(dplyr::c_across(tidyselect::starts_with("RKT"))),0),0)) |>
+                  tubePacks = round(sum(dplyr::c_across(2:ncol(tubeGrowerRTEs)))-exportBins-japanTrayPacks-tempZPacks,0)) |>
     dplyr::select(c(GraderBatchID, tubePacks, exportBins, japanTrayPacks, tempZPacks))
 
 # calculation of Pre-size grower RTEs
