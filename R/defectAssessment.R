@@ -18,8 +18,10 @@
 
 defectAssessment <- function(seasons, password) {
 
-  selectedTemplates <- c("Grade Analysis", "Packer Rejects", "Defect Sorter Rejects", "Class 1.5 Analysis")
-  selectedTemplates2019 <- c("Reject Analysis", "Packer Rejects", "Defect Sorter Rejects")
+  #selectedTemplates <- c("Grade Analysis", "Packer Rejects", "Defect Sorter Rejects", "Class 1.5 Analysis")
+  #selectedTemplates2019 <- c("Reject Analysis", "Packer Rejects", "Defect Sorter Rejects")
+  selectedTemplates <- c("Grade Analysis")
+  selectedTemplates2019 <- c("Reject Analysis")
 
   if(max(seasons) >= 2020) {
 
