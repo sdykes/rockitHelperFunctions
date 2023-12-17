@@ -160,10 +160,10 @@ defectAssessment <- function(seasons, password) {
   gbd <- graderFunction(seasons, password)
 
   sq <- sampleQty2019 |>
-    bind_rows(sampleQty)
+    dplyr::bind_rows(sampleQty)
 
   defAss <- defect_assessments2019 |>
-    bind_rows(defect_assessments)
+    dplyr::bind_rows(defect_assessments)
 
   da <- defAss |>
     dplyr::group_by(Season, GraderBatchID, Defect) |>
