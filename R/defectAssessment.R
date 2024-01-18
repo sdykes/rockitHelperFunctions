@@ -28,7 +28,7 @@ defectAssessment <- function(seasons, password) {
     con <- DBI::dbConnect(odbc::odbc(),
                           Driver = "ODBC Driver 17 for SQL Server",
                           Server = "abcrepldb.database.windows.net",
-                          Database = "ABCPackerRepl",
+                          Database = "ABCPacker2023Repl",
                           UID = "abcadmin",
                           PWD = password,
                           Port = 1433
