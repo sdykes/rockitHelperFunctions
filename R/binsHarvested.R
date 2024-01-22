@@ -19,7 +19,7 @@
 binsHarvested <- function(seasons, password) {
 
   con <- DBI::dbConnect(odbc::odbc(),
-                        Driver = "ODBC Driver 17 for SQL Server",
+                        Driver = "ODBC Driver 18 for SQL Server",
                         Server = "abcrepldb.database.windows.net",
                         Database = "ABCPacker2023Repl",
                         UID = "abcadmin",
@@ -110,7 +110,7 @@ binsHarvested <- function(seasons, password) {
     dplyr::left_join(binsCompany2020, by = "BinDeliveryID")
 
   con <- DBI::dbConnect(odbc::odbc(),
-                        Driver = "ODBC Driver 17 for SQL Server",
+                        Driver = "ODBC Driver 18 for SQL Server",
                         Server = "abcrepldb.database.windows.net",
                         Database = "ABCPackRepl",
                         UID = "abcadmin",

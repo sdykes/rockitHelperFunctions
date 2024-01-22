@@ -26,7 +26,7 @@ defectAssessment <- function(seasons, password) {
   if(max(seasons) >= 2020) {
 
     con <- DBI::dbConnect(odbc::odbc(),
-                          Driver = "ODBC Driver 17 for SQL Server",
+                          Driver = "ODBC Driver 18 for SQL Server",
                           Server = "abcrepldb.database.windows.net",
                           Database = "ABCPacker2023Repl",
                           UID = "abcadmin",
@@ -93,7 +93,7 @@ defectAssessment <- function(seasons, password) {
   if(min(seasons) < 2020) {
 
     con <- DBI::dbConnect(odbc::odbc(),
-                          Driver = "ODBC Driver 17 for SQL Server",
+                          Driver = "ODBC Driver 18 for SQL Server",
                           Server = "abcrepldb.database.windows.net",
                           Database = "ABCPackRepl",
                           UID = "abcadmin",
