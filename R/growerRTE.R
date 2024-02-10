@@ -40,7 +40,7 @@ growerRTE <- function(seasons, password) {
                                 TubeTypeID, PresizeFlag, SampleFlag, CountID, DesignationID, SizeID)),
               by = "ProductID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_Tube_TypeT") |>
-                dplyr::select(c(TubeTypeID, TubeTypeDesc, RTEConversion, TubeDiameterID, FruitPerTube)),
+                dplyr::select(c(TubeTypeID, RTEConversion, TubeDiameterID, FruitPerTube, TubeCharacter)),
               by = "TubeTypeID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_Pack_TypeT") |> dplyr::select(c(PackTypeID, PackTypeDesc)),
               by = "PackTypeID") |>
@@ -66,8 +66,10 @@ growerRTE <- function(seasons, password) {
     dplyr::inner_join(dplyr::tbl(con, "sw_ProductT") |> dplyr::select(c(ProductID, TubeTypeID, GradeID)),
                by = c("PresizeProductID" = "ProductID")) |>
     dplyr::left_join(dplyr::tbl(con, "sw_Tube_TypeT") |>
-                dplyr::select(c(TubeTypeID, PresizeAvgTubeWeight, RTEConversion, TubeTypeDesc)),
+                dplyr::select(c(TubeTypeID, PresizeAvgTubeWeight, RTEConversion, TubeDiameterID, TubeCharacter)),
               by = "TubeTypeID") |>
+    dplyr::left_join(dplyr::tbl(con, "sw_Tube_DiameterT") |> dplyr::select(c(TubeDiameterID, TubeDiameter)),
+                     by = "TubeDiameterID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_GradeT") |> dplyr::select(c(GradeID, JuiceFlag)),
               by = "GradeID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_FarmT") |> dplyr::select(c(FarmID, FarmName)),
@@ -76,7 +78,7 @@ growerRTE <- function(seasons, password) {
               by = "BlockID") |>
     dplyr::left_join(dplyr::tbl(con, "sw_SeasonT") |> dplyr::select(c(SeasonID, SeasonDesc)),
                      by = "SeasonID") |>
-    dplyr::select(-c(SeasonID, FarmID, BlockID, TubeTypeID)) |>
+    dplyr::select(-c(SeasonID, FarmID, BlockID, TubeTypeID, TubeDiameterID)) |>
     dplyr::rename(GraderBatchID = PresizeOutputFromGraderBatchID) |>
     dplyr::collect()
 
@@ -120,6 +122,8 @@ growerRTE <- function(seasons, password) {
                   PresizeFlag == 0,
                   SampleFlag == 0) |>
     dplyr::mutate(ProductCode = stringr::str_c(DesignationCode, CountCode, TubesPerCarton, FruitPerTube, TubeDiameter, SizeCode),
+                  TubeCharacter = tidyr::replace_na(TubeCharacter,""),
+                  TubeTypeDesc = stringr::str_c(TubeDiameter,"/",FruitPerTube,TubeCharacter),
                   tubeGrowerRTEs = NoOfUnits*TubesPerCarton*RTEConversion) |>
     dplyr::group_by(GraderBatchID, ProductCode) |>
     dplyr::summarise(tubeGrowerRTEs = sum(tubeGrowerRTEs, na.rm=T),
