@@ -177,7 +177,8 @@ growerRTE <- function(seasons, password) {
 
   growerRTEsByGraderBatch <- growerRTEs |>
     dplyr::rowwise() |>
-    dplyr::mutate(totalGrowerRTEs = sum(dplyr::c_across(5:10)))
+    dplyr::mutate(totalGrowerRTEs = sum(dplyr::c_across(5:10))) |>
+    ungroup()
 
   return(growerRTEsByGraderBatch)
 
