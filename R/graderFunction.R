@@ -75,6 +75,7 @@ graderFunction <- function(seasons, password) {
       dplyr::left_join(dplyr::tbl(con, "ma_ShiftT") |> dplyr::select(ShiftID, ShiftCode), by = "ShiftID") |>
       dplyr::left_join(dplyr::tbl(con, "sw_SubdivisionT") |> dplyr::select(c(SubdivisionID, SubdivisionCode, SubdivisionDesc)),
                        by = "SubdivisionID") |>
+      dplyr::left_join(dplyr::tbl(con, "sw_Pick_NoT") |> dplyr::select(c(PickNoID, PickNo)), by = "PickNoID") |>
       dplyr::rename(owner = CompanyName) |>
       dplyr::mutate(Season = dplyr::case_when(SeasonID == 6 ~ 2020,
                                 SeasonID == 7 ~ 2021,
@@ -101,7 +102,8 @@ graderFunction <- function(seasons, password) {
                       BlockCode,
                       BlockName,
                       owner,
-                      MaturityCode)) |>
+                      MaturityCode,
+                      PickNo)) |>
       dplyr::collect()
     #
     # looseKgs calculation
@@ -208,7 +210,8 @@ graderFunction <- function(seasons, password) {
              rejectKgs,
              packOut,
              MaturityCode,
-             StorageType)
+             StorageType,
+             PickNo)
   } else {
 #
 # if the season don't include anything >= 2020 then return an empyty data frame
@@ -233,7 +236,8 @@ graderFunction <- function(seasons, password) {
       rejectKgs = numeric(),
       packOut = numeric(),
       MaturityCode = character(),
-      StorageType = character()
+      StorageType = character(),
+      PickNo = integer()
     )
   }
   #
@@ -302,6 +306,7 @@ graderFunction <- function(seasons, password) {
                                      TRUE ~ CompanyName)) |>
       dplyr::select(-c(FarmID, BlockID, SubdivisionID, StorageTypeID,
                        FirstStorageSiteCompanyID, ESPID, CompanyName )) |>
+      dplyr::mutate(PickNo = NA) |>
       dplyr::collect()
 
     graderBatchData2019 <- GraderBatchT2019 |>
@@ -348,7 +353,8 @@ graderFunction <- function(seasons, password) {
       rejectKgs = numeric(),
       packOut = numeric(),
       MaturityCode = character(),
-      StorageType = character()
+      StorageType = character(),
+      PickNo = integer()
     )
 
   }
@@ -375,7 +381,8 @@ graderFunction <- function(seasons, password) {
              rejectKgs,
              packOut,
              MaturityCode,
-             StorageType)) |>
+             StorageType,
+             PickNo)) |>
     dplyr::bind_rows(graderBatchData2020)
 
   return(gbd)
